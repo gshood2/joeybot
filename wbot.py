@@ -17,7 +17,7 @@ async def on_ready():
 
 @wbot.event
 async def on_voice_state_update(member, before, after):
-    targetMember=308698142428364812
+    targetMember=416567736739823619
     if member.id == targetMember:
         print(member.name)
         channel = member.voice.channel
