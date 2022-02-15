@@ -8,7 +8,7 @@ import asyncio
 
 wbot = commands.Bot(command_prefix='!')
 nextcord.opus.load_opus(ctypes.util.find_library("opus"))
-print("opus found = ", nextcord.opus.is_loaded())
+print("opus found =", nextcord.opus.is_loaded())
 
 @wbot.event
 async def on_ready():
