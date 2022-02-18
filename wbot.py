@@ -44,7 +44,7 @@ async def cm(ctx,target,file):
             bomb = await channel.connect()
             bomb.play(nextcord.FFmpegOpusAudio(file))
             await asyncio.sleep(10)
-            await whiteboy.disconnect()
+            await bomb.disconnect()
 
     
    
