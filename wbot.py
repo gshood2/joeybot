@@ -35,14 +35,15 @@ async def on_voice_state_update(member, before, after):
         await whiteboy.disconnect()
 
 @wbot.command(name='bomb',category= 'malice',description='bomb voice channel')
-async def cm(ctx,target,file):
+async def cm(ctx,target,filename):
     Guild=ctx.message.guild
+    tfile = filename + ".opus"
     members = await Guild.fetch_members().flatten()
     for member in members:
         if target == member.nick:
             channel = member.voice.channel
             bomb = await channel.connect()
-            bomb.play(nextcord.FFmpegOpusAudio(file))
+            bomb.play(nextcord.FFmpegOpusAudio(tfile))
             await asyncio.sleep(10)
             await bomb.disconnect()
 
