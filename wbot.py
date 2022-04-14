@@ -9,14 +9,14 @@ load_dotenv()
 #bot setup + opus lib check
 intents = nextcord.Intents.default()
 intents.members = True
-wbot = commands.Bot(command_prefix='!', intents=intents)
+joeybot = commands.Bot(command_prefix='!', intents=intents)
 nextcord.opus.load_opus(ctypes.util.find_library("opus"))
 print("opus found =", nextcord.opus.is_loaded())
-# set up cmd privelages
-@wbot.event
+
+@joeybot.event
 async def on_ready():
-    print(f'Logged in as {wbot.user.name}\n' + 'Connected to:')
-    guilds = wbot.guilds
+    print(f'Logged in as {joeybot.user.name}\n' + 'Connected to:')
+    guilds = joeybot.guilds
     #set join state
     global Join
     Join=True
@@ -27,10 +27,11 @@ async def on_ready():
     for server in guilds:
         print(server.name)
 
-@wbot.event
+@joeybot.event
 async def on_voice_state_update(member, before, after):
+    global joey,jack
     if Join == True:
-        if before.channel is None and member.id == joey or jack:
+        if before.channel is None and member.id is joey or member.id is jack:
             #print(member.name + " has joined")
             channel = member.voice.channel
             await asyncio.sleep(1)
@@ -38,12 +39,12 @@ async def on_voice_state_update(member, before, after):
             if member.id == joey:
                 pain.play(nextcord.FFmpegPCMAudio('whiteboy.mp3'))
             elif member.id == jack:
-                 pain.play(nextcord.FFmpegOpusAudio('em-ahh.'))
+                 pain.play(nextcord.FFmpegOpusAudio('em-ahh.opus'))
             await asyncio.sleep(4)
             await pain.disconnect()
     else: print("join not active")
 
-@wbot.command(name='bomb',description='bomb voice channel')
+@joeybot.command(name='bomb',description='bomb voice channel')
 async def bomb(ctx,target,filename):
         Guild=ctx.message.guild
         tfile = filename + ".opus"
@@ -56,16 +57,16 @@ async def bomb(ctx,target,filename):
                 await asyncio.sleep(10)
                 await bomb.disconnect()
 
-@wbot.command(name='togglejoey')
+@joeybot.command(name='togglejoin')
 async def togglejoey(ctx):
     global Join
     if Join == False:
         Join=True
-        await  ctx.send("white boy clip on Joey join is now enabled")
+        await  ctx.send("Join is now enabled")
     elif Join == True:
         Join=False
-        await  ctx.send("white boy clip on Joey join is now disabled")
+        await  ctx.send("Join is now disabled")
     
    
 
-wbot.run(os.getenv('TOKEN'))
+joeybot.run(os.getenv('TOKEN'))
