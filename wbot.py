@@ -6,8 +6,6 @@ import asyncio
 from dotenv import load_dotenv
 #load .env
 load_dotenv()
-#sets target
-targetMember = int(os.getenv('TARGET')) 
 #bot setup + opus lib check
 intents = nextcord.Intents.default()
 intents.members = True
@@ -19,24 +17,31 @@ print("opus found =", nextcord.opus.is_loaded())
 async def on_ready():
     print(f'Logged in as {wbot.user.name}\n' + 'Connected to:')
     guilds = wbot.guilds
-    #set joeyjoin state
-    global joeyJoin
-    joeyJoin=True
+    #set join state
+    global Join
+    Join=True
+    #sets target id's
+    global joey,jack
+    joey = int(os.getenv('joey-id')) 
+    jack = int(os.getenv('jack-id')) 
     for server in guilds:
         print(server.name)
 
 @wbot.event
 async def on_voice_state_update(member, before, after):
-    if joeyJoin == True:
-        if before.channel is None and member.id == targetMember:
+    if Join == True:
+        if before.channel is None and member.id == joey or jack:
             #print(member.name + " has joined")
             channel = member.voice.channel
             await asyncio.sleep(1)
-            whiteboy = await channel.connect()
-            whiteboy.play(nextcord.FFmpegPCMAudio('whiteboy.mp3')) 
+            pain = await channel.connect()
+            if member.id == joey:
+                pain.play(nextcord.FFmpegPCMAudio('whiteboy.mp3'))
+            elif member.id == jack:
+                 pain.play(nextcord.FFmpegOpusAudio('em-ahh.'))
             await asyncio.sleep(4)
-            await whiteboy.disconnect()
-    else: print("joeyjoin not active")
+            await pain.disconnect()
+    else: print("join not active")
 
 @wbot.command(name='bomb',description='bomb voice channel')
 async def bomb(ctx,target,filename):
@@ -53,12 +58,12 @@ async def bomb(ctx,target,filename):
 
 @wbot.command(name='togglejoey')
 async def togglejoey(ctx):
-    global joeyJoin
-    if joeyJoin == False:
-        joeyJoin=True
+    global Join
+    if Join == False:
+        Join=True
         await  ctx.send("white boy clip on Joey join is now enabled")
-    elif joeyJoin == True:
-        joeyJoin=False
+    elif Join == True:
+        Join=False
         await  ctx.send("white boy clip on Joey join is now disabled")
     
    
