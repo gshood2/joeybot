@@ -50,30 +50,33 @@ async def on_voice_state_update(member, before, after):
                 await asyncio.sleep(4)
                 await pain.disconnect()
     else: print("join not active")
+#Main CMD COG
+class Main(commands.Cog, name='Main'):
+    def __init__(self, bot):
+        self.bot = joeybot
+    @commands.command(name='bomb',description='bomb voice channel')
+    async def bomb(self,ctx,target,filename):
+            Guild=ctx.message.guild
+            tfile = filename + ".opus"
+            members = await Guild.fetch_members().flatten()
+            for member in members:
+                if target == member.nick:
+                    channel = member.voice.channel
+                    bomb = await channel.connect()
+                    bomb.play(nextcord.FFmpegOpusAudio(tfile))
+                    await asyncio.sleep(10)
+                    await bomb.disconnect()
 
-@joeybot.command(name='bomb',description='bomb voice channel')
-async def bomb(ctx,target,filename):
-        Guild=ctx.message.guild
-        tfile = filename + ".opus"
-        members = await Guild.fetch_members().flatten()
-        for member in members:
-            if target == member.nick:
-                channel = member.voice.channel
-                bomb = await channel.connect()
-                bomb.play(nextcord.FFmpegOpusAudio(tfile))
-                await asyncio.sleep(10)
-                await bomb.disconnect()
-
-@joeybot.command(name='togglejoin')
-async def togglejoey(ctx):
-    global Join
-    if Join == False:
-        Join=True
-        await  ctx.send("Join is now enabled")
-    elif Join == True:
-        Join=False
-        await  ctx.send("Join is now disabled")
+    @commands.command(name='togglejoin')
+    async def togglejoey(self,ctx):
+        global Join
+        if Join == False:
+            Join=True
+            await  ctx.send("Join is now enabled")
+        elif Join == True:
+            Join=False
+            await  ctx.send("Join is now disabled")
     
-   
-
+joeybot.load_extension('music')   
+joeybot.add_cog(Main(joeybot))
 joeybot.run(os.getenv('TOKEN'))
