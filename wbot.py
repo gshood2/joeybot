@@ -12,16 +12,19 @@ intents.members = True
 joeybot = commands.Bot(command_prefix='!', intents=intents)
 nextcord.opus.load_opus(ctypes.util.find_library("opus"))
 print("opus found =", nextcord.opus.is_loaded())
-
+#runs when bot starts
 @joeybot.event
 async def on_ready():
     print(f'Logged in as {joeybot.user.name}\n' + 'Connected to:')
     guilds = joeybot.guilds
-    #set join state
+    #set default join state
     global Join
     Join=True
-    #sets target id's
+    #sets target id's to vars
     global joey,jack
+    #for test 
+    #joey = int(os.getenv('greg-id'))
+    ################################
     joey = int(os.getenv('joey-id')) 
     jack = int(os.getenv('jack-id')) 
     for server in guilds:
@@ -31,17 +34,21 @@ async def on_ready():
 async def on_voice_state_update(member, before, after):
     global joey,jack
     if Join == True:
-        if before.channel is None and member.id is joey or member.id is jack:
-            #print(member.name + " has joined")
-            channel = member.voice.channel
+        if before.channel is None:
+            print(member.name + " has joined")
             await asyncio.sleep(1)
-            pain = await channel.connect()
             if member.id == joey:
-                pain.play(nextcord.FFmpegPCMAudio('whiteboy.mp3'))
+                pain = await member.voice.channel.connect()
+                FILE="whiteboy.opus"
+                pain.play(nextcord.FFmpegOpusAudio(FILE))
+                await asyncio.sleep(4)
+                await pain.disconnect()
             elif member.id == jack:
-                 pain.play(nextcord.FFmpegOpusAudio('em-ahh.opus'))
-            await asyncio.sleep(4)
-            await pain.disconnect()
+                pain = await member.voice.channel.connect()
+                FILE="em-ahh.opus"
+                pain.play(nextcord.FFmpegOpusAudio(FILE))
+                await asyncio.sleep(4)
+                await pain.disconnect()
     else: print("join not active")
 
 @joeybot.command(name='bomb',description='bomb voice channel')
