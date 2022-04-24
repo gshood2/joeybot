@@ -54,7 +54,7 @@ async def on_voice_state_update(member, before, after):
 class Main(commands.Cog, name='Main'):
     def __init__(self, bot):
         self.bot = joeybot
-    @commands.command(name='bomb',description='bomb voice channel')
+    @commands.command(name='bomb',brief='bomb voice channel')
     async def bomb(self,ctx,target,filename):
             Guild=ctx.message.guild
             tfile = filename + ".opus"
@@ -67,7 +67,7 @@ class Main(commands.Cog, name='Main'):
                     await asyncio.sleep(10)
                     await bomb.disconnect()
 
-    @commands.command(name='togglejoin')
+    @commands.command(name='togglejoin', brief='toggles pain for joey and jack')
     async def togglejoey(self,ctx):
         global Join
         if Join == False:
