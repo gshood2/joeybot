@@ -54,18 +54,6 @@ async def on_voice_state_update(member, before, after):
 class Main(commands.Cog, name='Main'):
     def __init__(self, bot):
         self.bot = joeybot
-    @commands.command(name='bomb',brief='Bomb voice channel')
-    async def bomb(self,ctx,target,filename):
-            Guild=ctx.message.guild
-            tfile = filename + ".opus"
-            members = await Guild.fetch_members().flatten()
-            for member in members:
-                if target == member.nick:
-                    channel = member.voice.channel
-                    bomb = await channel.connect()
-                    bomb.play(nextcord.FFmpegOpusAudio(tfile))
-                    await asyncio.sleep(10)
-                    await bomb.disconnect()
 
     @commands.command(name='togglejoin', brief='Toggles autojoin bomb')
     async def togglejoey(self,ctx):
