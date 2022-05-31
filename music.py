@@ -3,32 +3,52 @@ import nextcord
 from yt_dlp import YoutubeDL
 import json
 from youtube_search import YoutubeSearch
+from queue import Queue
+import time
 
 
 
 
-queue= ('1','2','3')
+
+
 
 
 class Music(commands.Cog):
-    
+
     @commands.command(name='play',brief='play a video')
-    async def play(self,ctx,video): 
+    async def play(self,ctx,video=None):
+        #youtube dl wrapper and player
+        def ytdl(URL):
+                    ydl_opts = {'format': 'bestaudio',}
+                    with YoutubeDL(ydl_opts) as ydl:
+                        video_info = ydl.extract_info(URL,download=False)
+                        return video_info['url'] 
+
+        
+        vc = nextcord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
+        queue = Queue(maxsize=100)
+        def queue_loop(queue):
+            if vc is not None and vc.is_connected() == True:
+                while not queue.empty():
+                    if vc.is_playing() == False:
+                        print('test')
+                        vc.play(nextcord.FFmpegPCMAudio(queue.get()))
+                    else:
+                        time.sleep(5)
+
         if ctx.message.author.voice is None:
             await ctx.send("Please join a voice channel")
+        elif video==None:
+            await ctx.send('Playing')
+            await vc.resume()
         else:
-            ydl_opts = {'format': 'bestaudio',}
             channel = ctx.message.author.voice.channel 
-            vc = nextcord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
             if vc is None:
-                voice = await channel.connect()
+                vc = await channel.connect()
             else:
-                await ctx.voice_client.disconnect()
-                voice = await channel.connect()
+                await vc.move_to(channel)
             if "https:" in video:
-                with YoutubeDL(ydl_opts) as ydl:
-                    video_info = ydl.extract_info(video,download=False)
-                voice.play(nextcord.FFmpegPCMAudio(video_info['url']))
+                URL = video
             else:
                 search = YoutubeSearch(video, max_results=5).to_dict()
                 Result1=search[0]
@@ -42,23 +62,29 @@ class Music(commands.Cog):
                     return msg.channel == ctx.channel
                 SUFFIX = None
                 while SUFFIX is None:
-                    Choice = await ctx.bot.wait_for('message', check=msgCheck, timeout=30)
+                    Choice = await ctx.bot.wait_for('message', check=msgCheck, timeout=15)
                     if Choice.content == '1':
                         SUFFIX=Result1
+                        TITLE=Result1['title']
                     elif Choice.content == '2':
                         SUFFIX=Result2
+                        TITLE=Result2['title']
                     elif Choice.content == '3':
-                        SUFFIX=Result3 
+                        SUFFIX=Result3
+                        TITLE=Result3['title']
                     elif Choice.content == '4':
                         SUFFIX=Result4 
+                        TITLE=Result4['title']
                     elif Choice.content == '5':
                         SUFFIX=Result5
+                        TITLE=Result5['title']
                     else:
                         await ctx.send('Invalid choice') 
                 URL = 'https://www.youtube.com' + SUFFIX['url_suffix']
-                with YoutubeDL(ydl_opts) as ydl:
-                    video_info = ydl.extract_info(URL,download=False)
-                voice.play(nextcord.FFmpegPCMAudio(video_info['url']))
+            #call queue
+            queue.put(ytdl(URL))
+            await ctx.send(TITLE + " added to queue")
+            queue_loop(queue)
                 
 
     

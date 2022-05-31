@@ -29,27 +29,27 @@ async def on_ready():
     jack = int(os.getenv('jack-id')) 
     for server in guilds:
         print(server.name)
-
-@joeybot.event
-async def on_voice_state_update(member, before, after):
-    global joey,jack
-    if Join == True:
-        if before.channel is None:
-            print(member.name + " has joined")
-            await asyncio.sleep(1)
-            if member.id == joey:
-                pain = await member.voice.channel.connect()
-                FILE="whiteboy.opus"
-                pain.play(nextcord.FFmpegOpusAudio(FILE))
-                await asyncio.sleep(4)
-                await pain.disconnect()
-            elif member.id == jack:
-                pain = await member.voice.channel.connect()
-                FILE="em-ahh.opus"
-                pain.play(nextcord.FFmpegOpusAudio(FILE))
-                await asyncio.sleep(4)
-                await pain.disconnect()
-    else: print("Join not active")
+#commented out used to annoy joey and jack
+# @joeybot.event
+# async def on_voice_state_update(member, before, after):
+#     global joey,jack
+#     if Join == True:
+#         if before.channel is None:
+#             print(member.name + " has joined")
+#             await asyncio.sleep(1)
+#             if member.id == joey:
+#                 pain = await member.voice.channel.connect()
+#                 FILE="whiteboy.opus"
+#                 pain.play(nextcord.FFmpegOpusAudio(FILE))
+#                 await asyncio.sleep(4)
+#                 await pain.disconnect()
+#             elif member.id == jack:
+#                 pain = await member.voice.channel.connect()
+#                 FILE="em-ahh.opus"
+#                 pain.play(nextcord.FFmpegOpusAudio(FILE))
+#                 await asyncio.sleep(4)
+#                 await pain.disconnect()
+#     else: print("Join not active")
 #Main CMD COG
 class Main(commands.Cog, name='Main'):
     def __init__(self, bot):
@@ -70,6 +70,6 @@ class Main(commands.Cog, name='Main'):
         await ctx.voice_client.disconnect()
         await ctx.send("Leaving")
     
-joeybot.load_extension('music')   
+joeybot.load_extension('music')
 joeybot.add_cog(Main(joeybot))
 joeybot.run(os.getenv('TOKEN'))
