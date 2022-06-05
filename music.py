@@ -71,7 +71,7 @@ class Music(commands.Cog):
                     elif Choice.content == '5':
                         SUFFIX = Result5
                     else:
-                        await ctx.send('Invalid choice')
+                        await ctx.send('Invalid choice', delete_after=100)
                 URL = 'https://www.youtube.com' + SUFFIX['url_suffix']
             # title has index of 1, audio has index of 0
             video_data = ytdl(URL)
