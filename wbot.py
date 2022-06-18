@@ -18,14 +18,6 @@ print("opus found =", nextcord.opus.is_loaded())
 async def on_ready():
     print(f'Logged in as {joeybot.user.name}\n' + 'Connected to:')
     guilds = joeybot.guilds
-    # set default join state
-    global Join
-    Join = True
-    # sets target id's to vars
-    global joey, jack
-    # for test
-    #joey = int(os.getenv('greg-id'))
-    ################################
     joey = int(os.getenv('joey-id'))
     jack = int(os.getenv('jack-id'))
     for server in guilds:
@@ -35,16 +27,6 @@ async def on_ready():
 class Main(commands.Cog, name='Main'):
     def __init__(self, bot):
         self.bot = joeybot
-
-    # @commands.command(name='togglejoin', brief='Toggles autojoin bomb')
-    # async def togglejoey(self,ctx):
-    #     global Join
-    #     if Join == False:
-    #         Join=True
-    #         await ctx.send("Join is now enabled.")
-    #     elif Join == True:
-    #         Join=False
-    #         await ctx.send("Join is now disabled.")
 
     @commands.command(brief='Makes bot leave the channel')
     async def leave(self, ctx):
