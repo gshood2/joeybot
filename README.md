@@ -5,3 +5,4 @@ a simple youtube music bot for discord using the nextcord fork of discord.py
  - nextcord (voice)
  - yt-dlp 
  - YoutubeSearch 
+ - dotenv

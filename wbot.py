@@ -9,15 +9,15 @@ load_dotenv()
 # bot setup + opus lib check
 intents = nextcord.Intents.default()
 intents.members = True
-joeybot = commands.Bot(command_prefix='!', intents=intents)
+wbot = commands.Bot(command_prefix='!', intents=intents)
 nextcord.opus.load_opus(ctypes.util.find_library("opus"))
 print("opus found =", nextcord.opus.is_loaded())
 
 # runs when bot starts
-@joeybot.event
+@wbot.event
 async def on_ready():
-    print(f'Logged in as {joeybot.user.name}\n' + 'Connected to:')
-    guilds = joeybot.guilds
+    print(f'Logged in as {wbot.user.name}\n' + 'Connected to:')
+    guilds = wbot.guilds
     joey = int(os.getenv('joey-id'))
     jack = int(os.getenv('jack-id'))
     for server in guilds:
@@ -26,7 +26,7 @@ async def on_ready():
 # Main CMD COG
 class Main(commands.Cog, name='Main'):
     def __init__(self, bot):
-        self.bot = joeybot
+        self.bot = wbot
 
     @commands.command(brief='Makes bot leave the channel')
     async def leave(self, ctx):
@@ -45,6 +45,6 @@ class Main(commands.Cog, name='Main'):
         else:
             await ctx.send("I'm in a voice channel",delete_after=100)
 
-joeybot.load_extension('music')
-joeybot.add_cog(Main(joeybot))
-joeybot.run(os.getenv('TOKEN'))
+wbot.load_extension('music')
+wbot.add_cog(Main(wbot))
+wbot.run(os.getenv('TOKEN'))

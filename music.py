@@ -137,5 +137,5 @@ class Music(commands.Cog):
             await ctx.send('Nothing is queued', delete_after=100)
 
 
-def setup(joeybot):
-    joeybot.add_cog(Music(joeybot))
+def setup(wbot):
+    wbot.add_cog(Music(wbot))
