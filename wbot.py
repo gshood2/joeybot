@@ -46,5 +46,6 @@ class Main(commands.Cog, name='Main'):
             await ctx.send("I'm in a voice channel",delete_after=100)
 
 wbot.load_extension('music')
+wbot.load_extension('servers')
 wbot.add_cog(Main(wbot))
 wbot.run(os.getenv('TOKEN'))
