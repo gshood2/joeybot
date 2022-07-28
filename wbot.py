@@ -18,8 +18,6 @@ print("opus found =", nextcord.opus.is_loaded())
 async def on_ready():
     print(f'Logged in as {wbot.user.name}\n' + 'Connected to:')
     guilds = wbot.guilds
-    joey = int(os.getenv('joey-id'))
-    jack = int(os.getenv('jack-id'))
     for server in guilds:
         print(server.name)
 
