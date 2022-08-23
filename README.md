@@ -1,7 +1,7 @@
 # joeybot
-a simple bot for discord using the nextcord fork of discord.py, named after my friend joey.
+a simple bot for discord using the nextcord fork of discord.py.
 
- # Python External Module requirements
+ # Python Modules requirements
  - nextcord (voice)
  - yt-dlp 
  - YoutubeSearch 
@@ -11,4 +11,4 @@ a simple bot for discord using the nextcord fork of discord.py, named after my f
 - A .env file is used to supply your bot's token and other pieces of data.
 
 # Netcat
-- Netcat is required for the status command to work
+- Netcat is required on the machine running the bot for the status command to work
