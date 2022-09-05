@@ -1,7 +1,7 @@
 # joeybot
 a simple bot for discord using the nextcord fork of discord.py.
 
- # Python Modules requirements
+ # Python Modules
  - nextcord (voice)
  - yt-dlp 
  - YoutubeSearch 
