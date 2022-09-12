@@ -6,10 +6,11 @@ import subprocess
 
 
 class servers(commands.Cog):
-    def __init__(self, ctx):
+    def __init__(self, wbot: commands.Bot):
         self.ph = 1
+        self.bot = wbot
 
-    @commands.command(name="ip", brief="get ip for a game server")
+    @nextcord.slash_command(name="ip", description="get ip for a game server")
     async def ip(self, ctx, game):
         ip = os.getenv('MY-IP')
         game = game.casefold()
@@ -20,11 +21,11 @@ class servers(commands.Cog):
         else:
             ctx.send('invalid game', delete_after=5)
         server_address = ip + ":" + port
-        member = ctx.author
+        member = ctx.user
         await ctx.send('check your dm\'s', delete_after=3)
         await member.send(server_address, delete_after=300)
 
-    @commands.command(name="status", brief="see the status of a server")
+    @nextcord.slash_command(name="status", description="see the status of a server")
     async def status(self, ctx, game):
         local_ip = os.getenv('local-ip')
         game = game.casefold()

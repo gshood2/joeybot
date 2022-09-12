@@ -6,16 +6,15 @@ from youtube_search import YoutubeSearch
 
 
 class Music(commands.Cog):
-    def __init__(self, ctx):
+    def __init__(self, wbot: commands.Bot):
+        self.bot = wbot
         self.queue = []
         self.title = []
 
-    @commands.command(name='play', brief='play a video')
-    async def play(self, ctx, video=None, *args):
+    @nextcord.slash_command(name='play', description='play a video')
+    async def play(self, ctx, video=None):
         # adds any futher arguments to video arg
-        for x in args:
-            video = video + ' ' + x
-        vc = nextcord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
+        vc = nextcord.utils.get(self.bot.voice_clients, guild=ctx.guild)
 
         # youtube dl wrapper, returns audio url and title of video in a tuple
         def ytdl(URL):
@@ -32,13 +31,13 @@ class Music(commands.Cog):
                 vc.play(nextcord.FFmpegPCMAudio(source),
                         after=lambda e: queue_loop(self.queue))
 
-        if ctx.message.author.voice is None:
+        if ctx.user.voice is None:
             await ctx.send("Please join a voice channel")
         elif video == None:
             vc.resume()
             await ctx.send("Playing", delete_after=100)
         else:
-            channel = ctx.message.author.voice.channel
+            channel = ctx.user.voice.channel
             if vc is None:
                 vc = await channel.connect()
             else:
@@ -59,7 +58,7 @@ class Music(commands.Cog):
                     return msg.channel == ctx.channel
                 SUFFIX = None
                 while SUFFIX is None:
-                    Choice = await ctx.bot.wait_for('message', check=msgCheck, timeout=15)
+                    Choice = await self.bot.wait_for('message', check=msgCheck, timeout=15)
                     if Choice.content == '1':
                         SUFFIX = Result1
                     elif Choice.content == '2':
@@ -83,18 +82,18 @@ class Music(commands.Cog):
             if not vc.is_playing():
                 queue_loop(self.queue)
 
-    @commands.command(name='pause', brief='pause audio')
+    @nextcord.slash_command(name='pause', description='pause audio')
     async def pause(self, ctx):
-        vc = nextcord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
+        vc = nextcord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if vc is None:
             await ctx.send('Nothing is playing???', delete_after=100)
         else:
             vc.pause()
             await ctx.send('Audio paused', delete_after=100)
 
-    @commands.command(name='resume', brief='resume audio')
+    @nextcord.slash_command(name='resume', description='resume audio')
     async def resume(self, ctx):
-        vc = nextcord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
+        vc = nextcord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if vc is None:
             await ctx.send('Nothing is playing???', delete_after=100)
         elif vc.is_playing() is True:
@@ -103,9 +102,9 @@ class Music(commands.Cog):
             vc.resume()
             await ctx.send('Resumed Playback', delete_after=100)
 
-    @commands.command(name='stop', brief='stops audio and clears queue')
+    @nextcord.slash_command(name='stop', description='stops audio and clears queue')
     async def stop(self, ctx):
-        vc = nextcord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
+        vc = nextcord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if vc.is_playing is False:
             await ctx.send('Nothing is playing???', delete_after=100)
         else:
@@ -114,16 +113,16 @@ class Music(commands.Cog):
             self.title.clear()
             await ctx.send('Stopped Playback', delete_after=100)
 
-    @commands.command(name='skip', brief='skips what is playing')
+    @nextcord.slash_command(name='skip', description='skips what is playing')
     async def stop(self, ctx):
-        vc = nextcord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
+        vc = nextcord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if vc.is_playing is False:
             await ctx.send('Nothing is playing???', delete_after=100)
         else:
             vc.stop()
             await ctx.send('Skipped', delete_after=100)
 
-    @commands.command(name='queue', brief='show queue')
+    @nextcord.slash_command(name='queue', description='show queue')
     async def queue(self, ctx):
         if len(self.title) > 0:
             queue_num = 0
