@@ -18,16 +18,16 @@ class Music(commands.Cog):
         class search_select(nextcord.ui.Select):
             def __init__(self, search):
                 options=[  
-                    nextcord.SelectOption(label=search[0]['title'],emoji="📹",description="Channel: " + search[0]['channel'] 
-                    + ' Duration: ' + search[0]['duration'] + ' Published: ' + search[0]['publish_time']),
-                    nextcord.SelectOption(label=search[1]['title'],emoji="📹",description="Channel: " + search[1]['channel'] 
-                    + ' Duration: ' + search[1]['duration'] + ' Published: ' + search[1]['publish_time']),
-                     nextcord.SelectOption(label=search[2]['title'],emoji="📹",description="Channel: " + search[2]['channel'] 
-                    + ' Duration: ' + search[2]['duration'] + ' Published: ' + search[2]['publish_time']),
-                     nextcord.SelectOption(label=search[3]['title'],emoji="📹",description="Channel: " + search[3]['channel'] 
-                    + ' Duration: ' + search[3]['duration'] + ' Published: ' + search[3]['publish_time']), 
-                    nextcord.SelectOption(label=search[4]['title'],emoji="📹",description="Channel: " + search[4]['channel'] 
-                    + ' Duration: ' + search[4]['duration'] + ' Published: ' + search[4]['publish_time']),
+                    nextcord.SelectOption(label=str(search[0]['title']),emoji="📹",description="Channel: " + str(search[0]['channel']) 
+                    + ' Duration: ' + str(search[0]['duration']) + ' Published: ' + str(search[0]['publish_time'])),
+                    nextcord.SelectOption(label=str(search[1]['title']),emoji="📹",description="Channel: " + str(search[1]['channel']) 
+                    + ' Duration: ' + str(search[1]['duration']) + ' Published: ' + str(search[1]['publish_time'])),
+                    nextcord.SelectOption(label=str(search[2]['title']),emoji="📹",description="Channel: " + str(search[2]['channel']) 
+                    + ' Duration: ' + str(search[2]['duration']) + ' Published: ' + str(search[2]['publish_time'])),
+                    nextcord.SelectOption(label=str(search[3]['title']),emoji="📹",description="Channel: " + str(search[3]['channel']) 
+                    + ' Duration: ' + str(search[3]['duration']) + ' Published: ' + str(search[3]['publish_time'])),
+                    nextcord.SelectOption(label=str(search[4]['title']),emoji="📹",description="Channel: " + str(search[4]['channel']) 
+                    + ' Duration: ' + str(search[4]['duration']) + ' Published: ' + str(search[4]['publish_time'])),
                     ]
                 super().__init__(placeholder="Select an option",max_values=1,min_values=1,options=options)
             async def callback(self, interaction: nextcord.Interaction):
@@ -43,16 +43,18 @@ class Music(commands.Cog):
                     SUFFIX = search[4]['url_suffix']
                 URL = 'https://www.youtube.com' + SUFFIX
                 add(URL)
-                await interaction.response.send_message(content=f"Adding to queue {URL}!",ephemeral=False)
+                await interaction.response.send_message(content=f"Adding to queue {URL}!",ephemeral=False, delete_after=60)
 
                 
 
         #view for dropdown menu
         class search_view(nextcord.ui.View):
-            def __init__(self, search, *, timeout = 15):
+            def __init__(self, search, *, timeout = 15.0):
                 super().__init__(timeout=timeout)
                 self.dropdown = search_select(search)
                 self.add_item(self.dropdown)
+            async def on_timeout(self):
+                 self.clear_items()
 
         # youtube dl wrapper, returns audio url and title of video in a tuple
         def ytdl(URL):
@@ -66,9 +68,14 @@ class Music(commands.Cog):
                 source = self.queue_list[0]
                 self.queue_list.pop(0)
                 self.title.pop(0)
-                vc.play(nextcord.FFmpegPCMAudio(source),
+                vc.play(nextcord.FFmpegPCMAudio(source, before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'),
                         after=lambda e: queue_loop(self.queue_list))
-           
+        def add(URL):
+            video_data = ytdl(URL)
+            self.queue_list.append(video_data[0])
+            self.title.append(video_data[1])
+            if not vc.is_playing():
+                queue_loop(self.queue_list)   
         if ctx.user.voice is None:
             await ctx.send("Please join a voice channel")
         elif video == None:
@@ -82,18 +89,13 @@ class Music(commands.Cog):
             else:
                 await vc.move_to(channel)
             if "https:" in video:
-                 URL = video 
-
+                 URL = video
+                 add(URL)
             else:
                 search = YoutubeSearch(video, max_results=5).to_dict()
                 search_dropdown = search_view(search)
-                await ctx.send('Please select a video', view = search_dropdown)
-        def add(URL):
-            video_data = ytdl(URL)
-            self.queue_list.append(video_data[0])
-            self.title.append(video_data[1])
-            if not vc.is_playing():
-                queue_loop(self.queue_list)
+                await ctx.send('Please select a video', view = search_dropdown, delete_after=15)
+       
 
     @nextcord.slash_command(name='pause', description='pause audio')
     async def pause(self, ctx):
