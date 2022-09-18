@@ -1,5 +1,3 @@
-from ast import Global
-from secrets import choice
 from nextcord.ext import commands
 import nextcord
 from yt_dlp import YoutubeDL
@@ -44,7 +42,6 @@ class Music(commands.Cog):
                 elif self.values[0] == search[4]['title']:
                     SUFFIX = search[4]['url_suffix']
                 URL = 'https://www.youtube.com' + SUFFIX
-                print(URL)
                 add(URL)
                 await interaction.response.send_message(content=f"Adding to queue {URL}!",ephemeral=False)
 
@@ -62,13 +59,11 @@ class Music(commands.Cog):
             ydl_opts = {'format': 'bestaudio', }
             with YoutubeDL(ydl_opts) as ydl:
                 video_info = ydl.extract_info(URL, download=False)
-                print(video_info)
                 return video_info['url'], video_info['title']
 
         def queue_loop(queue_list):
             if vc.is_connected() == True and len(self.queue_list) > 0:
                 source = self.queue_list[0]
-                print(source)
                 self.queue_list.pop(0)
                 self.title.pop(0)
                 vc.play(nextcord.FFmpegPCMAudio(source),
@@ -97,7 +92,6 @@ class Music(commands.Cog):
             video_data = ytdl(URL)
             self.queue_list.append(video_data[0])
             self.title.append(video_data[1])
-            #print(self.queue_list)
             if not vc.is_playing():
                 queue_loop(self.queue_list)
 

@@ -10,7 +10,7 @@ load_dotenv()
 intents = nextcord.Intents.default()
 intents.members = True
 intents.messages = True
-intents.message_content = True
+#intents.message_content = True
 wbot = commands.Bot()
 nextcord.opus.load_opus(ctypes.util.find_library("opus"))
 print("opus found =", nextcord.opus.is_loaded())
