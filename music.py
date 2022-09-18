@@ -1,3 +1,5 @@
+from ast import Global
+from secrets import choice
 from nextcord.ext import commands
 import nextcord
 from yt_dlp import YoutubeDL
@@ -8,29 +10,70 @@ from youtube_search import YoutubeSearch
 class Music(commands.Cog):
     def __init__(self, wbot: commands.Bot):
         self.bot = wbot
-        self.queue = []
+        self.queue_list = []
         self.title = []
 
     @nextcord.slash_command(name='play', description='play a video')
     async def play(self, ctx, video=None):
-        # adds any futher arguments to video arg
         vc = nextcord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+        #dropdown menu
+        class search_select(nextcord.ui.Select):
+            def __init__(self, search):
+                options=[  
+                    nextcord.SelectOption(label=search[0]['title'],emoji="📹",description="Channel: " + search[0]['channel'] 
+                    + ' Duration: ' + search[0]['duration'] + ' Published: ' + search[0]['publish_time']),
+                    nextcord.SelectOption(label=search[1]['title'],emoji="📹",description="Channel: " + search[1]['channel'] 
+                    + ' Duration: ' + search[1]['duration'] + ' Published: ' + search[1]['publish_time']),
+                     nextcord.SelectOption(label=search[2]['title'],emoji="📹",description="Channel: " + search[2]['channel'] 
+                    + ' Duration: ' + search[2]['duration'] + ' Published: ' + search[2]['publish_time']),
+                     nextcord.SelectOption(label=search[3]['title'],emoji="📹",description="Channel: " + search[3]['channel'] 
+                    + ' Duration: ' + search[3]['duration'] + ' Published: ' + search[3]['publish_time']), 
+                    nextcord.SelectOption(label=search[4]['title'],emoji="📹",description="Channel: " + search[4]['channel'] 
+                    + ' Duration: ' + search[4]['duration'] + ' Published: ' + search[4]['publish_time']),
+                    ]
+                super().__init__(placeholder="Select an option",max_values=1,min_values=1,options=options)
+            async def callback(self, interaction: nextcord.Interaction):
+                if self.values[0] == search[0]['title']:
+                    SUFFIX = search[0]['url_suffix']
+                elif self.values[0] == search[1]['title']:
+                    SUFFIX = search[1]['url_suffix']
+                elif self.values[0] == search[2]['title']:
+                    SUFFIX = search[2]['url_suffix']
+                elif self.values[0] == search[3]['title']:
+                    SUFFIX = search[3]['url_suffix']
+                elif self.values[0] == search[4]['title']:
+                    SUFFIX = search[4]['url_suffix']
+                URL = 'https://www.youtube.com' + SUFFIX
+                print(URL)
+                add(URL)
+                await interaction.response.send_message(content=f"Adding to queue {URL}!",ephemeral=False)
+
+                
+
+        #view for dropdown menu
+        class search_view(nextcord.ui.View):
+            def __init__(self, search, *, timeout = 15):
+                super().__init__(timeout=timeout)
+                self.dropdown = search_select(search)
+                self.add_item(self.dropdown)
 
         # youtube dl wrapper, returns audio url and title of video in a tuple
         def ytdl(URL):
             ydl_opts = {'format': 'bestaudio', }
             with YoutubeDL(ydl_opts) as ydl:
                 video_info = ydl.extract_info(URL, download=False)
+                print(video_info)
                 return video_info['url'], video_info['title']
 
-        def queue_loop(queue):
-            if vc.is_connected() == True and len(self.queue) > 0:
-                source = self.queue[0]
-                self.queue.pop(0)
+        def queue_loop(queue_list):
+            if vc.is_connected() == True and len(self.queue_list) > 0:
+                source = self.queue_list[0]
+                print(source)
+                self.queue_list.pop(0)
                 self.title.pop(0)
                 vc.play(nextcord.FFmpegPCMAudio(source),
-                        after=lambda e: queue_loop(self.queue))
-
+                        after=lambda e: queue_loop(self.queue_list))
+           
         if ctx.user.voice is None:
             await ctx.send("Please join a voice channel")
         elif video == None:
@@ -38,49 +81,25 @@ class Music(commands.Cog):
             await ctx.send("Playing", delete_after=100)
         else:
             channel = ctx.user.voice.channel
+            global URL
             if vc is None:
                 vc = await channel.connect()
             else:
                 await vc.move_to(channel)
             if "https:" in video:
-                URL = video
+                 URL = video 
+
             else:
                 search = YoutubeSearch(video, max_results=5).to_dict()
-                Result1 = search[0]
-                Result2 = search[1]
-                Result3 = search[2]
-                Result4 = search[3]
-                Result5 = search[4]
-                await ctx.send('Please select a video', delete_after=100)
-                await ctx.send('1 ' + Result1['title'] + '\n2 ' + Result2['title'] + '\n3 ' + Result3['title'] + '\n4 ' + Result4['title'] + '\n5 ' + Result5['title'], delete_after=100)
-
-                def msgCheck(msg):
-                    return msg.channel == ctx.channel
-                SUFFIX = None
-                while SUFFIX is None:
-                    Choice = await self.bot.wait_for('message', check=msgCheck, timeout=15)
-                    if Choice.content == '1':
-                        SUFFIX = Result1
-                    elif Choice.content == '2':
-                        SUFFIX = Result2
-                    elif Choice.content == '3':
-                        SUFFIX = Result3
-                    elif Choice.content == '4':
-                        SUFFIX = Result4
-                    elif Choice.content == '5':
-                        SUFFIX = Result5
-                    else:
-                        await ctx.send('Invalid choice', delete_after=100)
-                URL = 'https://www.youtube.com' + SUFFIX['url_suffix']
-            # title has index of 1, audio has index of 0
+                search_dropdown = search_view(search)
+                await ctx.send('Please select a video', view = search_dropdown)
+        def add(URL):
             video_data = ytdl(URL)
-            # add vid data to queue
-            self.queue.append(video_data[0])
+            self.queue_list.append(video_data[0])
             self.title.append(video_data[1])
-            playTitle = video_data[1]
-            await ctx.send(playTitle + " added to queue", delete_after=100)
+            #print(self.queue_list)
             if not vc.is_playing():
-                queue_loop(self.queue)
+                queue_loop(self.queue_list)
 
     @nextcord.slash_command(name='pause', description='pause audio')
     async def pause(self, ctx):
@@ -109,7 +128,7 @@ class Music(commands.Cog):
             await ctx.send('Nothing is playing???', delete_after=100)
         else:
             vc.stop()
-            self.queue.clear()
+            self.queue_list.clear()
             self.title.clear()
             await ctx.send('Stopped Playback', delete_after=100)
 
