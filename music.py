@@ -1,5 +1,5 @@
-from nextcord.ext import commands
-import nextcord
+from discord.ext import commands
+import discord
 from yt_dlp import YoutubeDL
 import json
 from youtube_search import YoutubeSearch
@@ -11,26 +11,26 @@ class Music(commands.Cog):
         self.queue_list = []
         self.title = []
 
-    @nextcord.slash_command(name='play', description='play a video')
+    @discord.slash_command(name='play', description='play a video')
     async def play(self, ctx, video=None):
-        vc = nextcord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+        vc = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         #dropdown menu
-        class search_select(nextcord.ui.Select):
+        class search_select(discord.ui.Select):
             def __init__(self, search):
                 options=[  
-                    nextcord.SelectOption(label=str(search[0]['title']),emoji="📹",description="Channel: " + str(search[0]['channel']) 
+                    discord.SelectOption(label=str(search[0]['title']),emoji="📹",description="Channel: " + str(search[0]['channel']) 
                     + ' Duration: ' + str(search[0]['duration']) + ' Published: ' + str(search[0]['publish_time'])),
-                    nextcord.SelectOption(label=str(search[1]['title']),emoji="📹",description="Channel: " + str(search[1]['channel']) 
+                    discord.SelectOption(label=str(search[1]['title']),emoji="📹",description="Channel: " + str(search[1]['channel']) 
                     + ' Duration: ' + str(search[1]['duration']) + ' Published: ' + str(search[1]['publish_time'])),
-                    nextcord.SelectOption(label=str(search[2]['title']),emoji="📹",description="Channel: " + str(search[2]['channel']) 
+                    discord.SelectOption(label=str(search[2]['title']),emoji="📹",description="Channel: " + str(search[2]['channel']) 
                     + ' Duration: ' + str(search[2]['duration']) + ' Published: ' + str(search[2]['publish_time'])),
-                    nextcord.SelectOption(label=str(search[3]['title']),emoji="📹",description="Channel: " + str(search[3]['channel']) 
+                    discord.SelectOption(label=str(search[3]['title']),emoji="📹",description="Channel: " + str(search[3]['channel']) 
                     + ' Duration: ' + str(search[3]['duration']) + ' Published: ' + str(search[3]['publish_time'])),
-                    nextcord.SelectOption(label=str(search[4]['title']),emoji="📹",description="Channel: " + str(search[4]['channel']) 
+                    discord.SelectOption(label=str(search[4]['title']),emoji="📹",description="Channel: " + str(search[4]['channel']) 
                     + ' Duration: ' + str(search[4]['duration']) + ' Published: ' + str(search[4]['publish_time'])),
                     ]
                 super().__init__(placeholder="Select an option",max_values=1,min_values=1,options=options)
-            async def callback(self, interaction: nextcord.Interaction):
+            async def callback(self, interaction: discord.Interaction):
                 if self.values[0] == search[0]['title']:
                     SUFFIX = search[0]['url_suffix']
                 elif self.values[0] == search[1]['title']:
@@ -48,7 +48,7 @@ class Music(commands.Cog):
                 
 
         #view for dropdown menu
-        class search_view(nextcord.ui.View):
+        class search_view(discord.ui.View):
             def __init__(self, search, *, timeout = 15.0):
                 super().__init__(timeout=timeout)
                 self.dropdown = search_select(search)
@@ -68,7 +68,7 @@ class Music(commands.Cog):
                 source = self.queue_list[0]
                 self.queue_list.pop(0)
                 self.title.pop(0)
-                vc.play(nextcord.FFmpegPCMAudio(source, before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'),
+                vc.play(discord.FFmpegPCMAudio(source, before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'),
                         after=lambda e: queue_loop(self.queue_list))
         def add(URL):
             video_data = ytdl(URL)
@@ -77,10 +77,10 @@ class Music(commands.Cog):
             if not vc.is_playing():
                 queue_loop(self.queue_list)   
         if ctx.user.voice is None:
-            await ctx.send("Please join a voice channel")
+            await ctx.respond("Please join a voice channel")
         elif video == None:
             vc.resume()
-            await ctx.send("Playing", delete_after=100)
+            await ctx.respond("Playing", delete_after=100)
         else:
             channel = ctx.user.voice.channel
             global URL
@@ -94,50 +94,50 @@ class Music(commands.Cog):
             else:
                 search = YoutubeSearch(video, max_results=5).to_dict()
                 search_dropdown = search_view(search)
-                await ctx.send('Please select a video', view = search_dropdown, delete_after=15)
+                await ctx.respond('Please select a video', view = search_dropdown, delete_after=15)
        
 
-    @nextcord.slash_command(name='pause', description='pause audio')
+    @discord.slash_command(name='pause', description='pause audio')
     async def pause(self, ctx):
-        vc = nextcord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+        vc = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if vc is None:
-            await ctx.send('Nothing is playing???', delete_after=100)
+            await ctx.respond('Nothing is playing???', delete_after=100)
         else:
             vc.pause()
-            await ctx.send('Audio paused', delete_after=100)
+            await ctx.respond('Audio paused', delete_after=100)
 
-    @nextcord.slash_command(name='resume', description='resume audio')
+    @discord.slash_command(name='resume', description='resume audio')
     async def resume(self, ctx):
-        vc = nextcord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+        vc = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if vc is None:
-            await ctx.send('Nothing is playing???', delete_after=100)
+            await ctx.respond('Nothing is playing???', delete_after=100)
         elif vc.is_playing() is True:
-            await ctx.send('Audio is already playing', delete_after=100)
+            await ctx.respond('Audio is already playing', delete_after=100)
         else:
             vc.resume()
-            await ctx.send('Resumed Playback', delete_after=100)
+            await ctx.respond('Resumed Playback', delete_after=100)
 
-    @nextcord.slash_command(name='stop', description='stops audio and clears queue')
+    @discord.slash_command(name='stop', description='stops audio and clears queue')
     async def stop(self, ctx):
-        vc = nextcord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+        vc = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if vc.is_playing is False:
-            await ctx.send('Nothing is playing???', delete_after=100)
+            await ctx.respond('Nothing is playing???', delete_after=100)
         else:
             vc.stop()
             self.queue_list.clear()
             self.title.clear()
-            await ctx.send('Stopped Playback', delete_after=100)
+            await ctx.respond('Stopped Playback', delete_after=100)
 
-    @nextcord.slash_command(name='skip', description='skips what is playing')
+    @discord.slash_command(name='skip', description='skips what is playing')
     async def stop(self, ctx):
-        vc = nextcord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+        vc = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
         if vc.is_playing is False:
-            await ctx.send('Nothing is playing???', delete_after=100)
+            await ctx.respond('Nothing is playing???', delete_after=100)
         else:
             vc.stop()
-            await ctx.send('Skipped', delete_after=100)
+            await ctx.respond('Skipped', delete_after=100)
 
-    @nextcord.slash_command(name='queue', description='show queue')
+    @discord.slash_command(name='queue', description='show queue')
     async def queue(self, ctx):
         if len(self.title) > 0:
             queue_num = 0
@@ -146,9 +146,9 @@ class Music(commands.Cog):
                 queue_num += 1
                 number = str(queue_num)
                 queue_list = queue_list + number + ' ' + title + ' \n'
-            await ctx.send(queue_list, delete_after=100)
+            await ctx.respond(queue_list, delete_after=100)
         else:
-            await ctx.send('Nothing is queued', delete_after=100)
+            await ctx.respond('Nothing is queued', delete_after=100)
 
 
 def setup(wbot):
